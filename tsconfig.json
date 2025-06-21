@@ -18,7 +18,13 @@
     "declaration": true,
     "declarationDir": "dist/types",
     "emitDeclarationOnly": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "lodash/*": [
+        "node_modules/@types/lodash-es/*"
+      ]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "storybook-static", "src/**/*.stories.tsx"]

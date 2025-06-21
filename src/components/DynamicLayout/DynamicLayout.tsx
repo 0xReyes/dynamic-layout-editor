@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Row, Col, Card, Tabs, Typography } from 'antd';
-import { set, get, cloneDeep } from 'lodash-es';
+import lodash from 'lodash';
 import { useMultiSize } from '../../hooks/useMultiSize';
 import { ObjectTreeView } from '../ObjectTreeView';
 import { JSONPropertyRenderer } from '../JSONPropertyRenderer';
@@ -41,8 +41,8 @@ export const DynamicLayout: React.FC<DynamicLayoutProps> = ({
 
   const handleChange = useCallback((path: string, newValue: any) => {
     setData((prev) => {
-      const newData = cloneDeep(prev);
-      set(newData, path, newValue);
+      const newData = lodash.cloneDeep(prev);
+      lodash.set(newData, path, newValue);
       return newData;
     });
   }, []);
@@ -57,8 +57,8 @@ export const DynamicLayout: React.FC<DynamicLayoutProps> = ({
     const parentPath = pathParts.join('.');
     
     setData(prev => {
-        const newData = cloneDeep(prev);
-        const parent = parentPath ? get(newData, parentPath) : newData;
+        const newData = lodash.cloneDeep(prev);
+        const parent = parentPath ? lodash.get(newData, parentPath) : newData;
 
         if (Array.isArray(parent)) {
             parent.splice(Number(key), 1);
@@ -75,7 +75,7 @@ export const DynamicLayout: React.FC<DynamicLayoutProps> = ({
   useEffect(() => {
     onUpdate(data);
     if (selectedItem) {
-      const freshValue = get(data, selectedItem.fullPath);
+      const freshValue = lodash.get(data, selectedItem.fullPath);
       if (JSON.stringify(freshValue) !== JSON.stringify(selectedItem.value)) {
         setSelectedItem((prev) => prev ? ({ ...prev, value: freshValue }) : null);
       }

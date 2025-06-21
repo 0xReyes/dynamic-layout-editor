@@ -28,7 +28,9 @@ export default [
     ],
     plugins: [
       peerDepsExternal(),
-      resolve(),
+      resolve({
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
+      }),
       commonjs(),
       swc({
         swc: {
@@ -59,7 +61,7 @@ export default [
   {
     input: 'src/index.ts',
     output: [{ file: 'dist/types/index.d.ts', format: 'esm' }],
-    plugins: [dts.default()],
+    plugins: [dts()],
     external: [/\.css$/u, 'react', 'react-dom', 'antd'],
   },
 ];

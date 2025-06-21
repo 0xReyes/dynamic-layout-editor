@@ -10,4 +10,4 @@ export * from './components/JSONPropertyRenderer';
 export * from './hooks/useMultiSize';
 
 // Types
-export * from './types';
+export * from './types.ts';

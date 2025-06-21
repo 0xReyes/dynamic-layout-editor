@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-export interface CustomStyles {
+export interface CustomStyles extends CSSProperties {
   root?: CSSProperties;
   card?: CSSProperties;
   input?: CSSProperties;

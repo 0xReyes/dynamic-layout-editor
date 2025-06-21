@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { Tree } from 'antd';
-import { get } from 'lodash-es';
+import lodash from 'lodash';
+
 import { generateKeyPath } from '../../utils';
 import type { SelectedItem, CustomStyles } from '../../types';
 
@@ -35,7 +36,7 @@ export const ObjectTreeView: React.FC<ObjectTreeViewProps> = React.memo(({ data,
       if (selectedKeys.length > 0) {
         onChange({
           key: node.title,
-          value: get(data, node.key),
+          value: lodash.get(data, node.key),
           fullPath: node.key,
         });
       }
