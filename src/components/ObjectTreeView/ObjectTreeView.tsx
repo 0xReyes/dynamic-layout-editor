@@ -3,11 +3,11 @@ import { Tree } from 'antd';
 import lodash from 'lodash';
 
 import { generateKeyPath } from '../../utils';
-import type { SelectedItem, CustomStyles } from '../../types';
+import type { SelectedNode, CustomStyles } from '../../types';
 
 interface ObjectTreeViewProps {
   data: object;
-  onChange: (item: SelectedItem) => void;
+  onChange: (item: SelectedNode) => void;
   height?: number;
   style?: CustomStyles['tree'];
 }
