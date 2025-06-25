@@ -1,6 +1,6 @@
 {
   "name": "@0xreyes/dynamic-layout-editor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A dynamic and customizable JSON configuration editor for React.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
