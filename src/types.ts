@@ -22,7 +22,7 @@ export interface CustomStyles extends CSSProperties {
   applyButton?: CSSProperties;
 }
 
-export interface SelectedItem {
+export interface SelectedNode {
   key: string;
   value: any;
   fullPath: string;

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Row, Col, Card, Tabs, Typography } from 'antd';
-import lodash from 'lodash';
-import { useMultiSize } from '../../hooks/useMultiSize';
+import { cloneDeep, set, get } from 'lodash';
+import useMultiSize from '../../hooks/useMultiSize';
 import { ObjectTreeView } from '../ObjectTreeView';
 import { JSONPropertyRenderer } from '../JSONPropertyRenderer';
 import { JSONEditor } from '../JSONEditor';
 import { defaultStyles } from '../../styles/defaultStyles';
-import type { CustomStyles, SelectedItem } from '../../types';
+import type { CustomStyles, SelectedNode } from '../../types';
 
 const { Text } = Typography;
 
@@ -28,11 +28,11 @@ export const DynamicLayout: React.FC<DynamicLayoutProps> = ({
   defaultActiveTab = 'tree',
 }) => {
   const [data, setData] = useState(configuration);
-  const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
+  const [selectedNode, setSelectedNode] = useState<SelectedNode | null>(null);
   const [activeTab, setActiveTab] = useState(defaultActiveTab);
   const { setRef, sizes } = useMultiSize();
 
-  const styles = useMemo(() => ({ ...defaultStyles, ...customStyles }), [customStyles]);
+  const styles = useMemo(() => ({ ...defaultStyles, ...customStyles }), [defaultStyles, customStyles]);
 
   const treeHeight = useMemo(() => {
     const navHeight = sizes.navContainer?.height || 0;
@@ -40,9 +40,9 @@ export const DynamicLayout: React.FC<DynamicLayoutProps> = ({
   }, [sizes.navContainer]);
 
   const handleChange = useCallback((path: string, newValue: any) => {
-    setData((prev) => {
-      const newData = lodash.cloneDeep(prev);
-      lodash.set(newData, path, newValue);
+    setData(prev => {
+      const newData = cloneDeep(prev);
+      set(newData, path, newValue);
       return newData;
     });
   }, []);
@@ -57,51 +57,52 @@ export const DynamicLayout: React.FC<DynamicLayoutProps> = ({
     const parentPath = pathParts.join('.');
     
     setData(prev => {
-        const newData = lodash.cloneDeep(prev);
-        const parent = parentPath ? lodash.get(newData, parentPath) : newData;
+      const newData = cloneDeep(prev);
+      const parent = parentPath ? get(newData, parentPath) : newData;
 
-        if (Array.isArray(parent)) {
-            parent.splice(Number(key), 1);
-        } else if (parent && typeof parent === 'object') {
-            delete (parent as any)[key];
-        }
-        
-        return newData;
+      if (Array.isArray(parent)) {
+        parent.splice(Number(key), 1);
+      } else if (parent && typeof parent === 'object') {
+        delete parent[key];
+      }
+      
+      return newData;
     });
-    setSelectedItem(null);
+    setSelectedNode(null);
   }, []);
-
 
   useEffect(() => {
     onUpdate(data);
-    if (selectedItem) {
-      const freshValue = lodash.get(data, selectedItem.fullPath);
-      if (JSON.stringify(freshValue) !== JSON.stringify(selectedItem.value)) {
-        setSelectedItem((prev) => prev ? ({ ...prev, value: freshValue }) : null);
+    if (selectedNode) {
+      const freshValue = get(data, selectedNode.fullPath);
+      if (JSON.stringify(freshValue) !== JSON.stringify(selectedNode.value)) {
+        setSelectedNode(prev => prev ? ({ ...prev, value: freshValue }) : null);
       }
     }
-  }, [data, onUpdate, selectedItem]);
+  }, [data, onUpdate, selectedNode]);
 
-  const getColSpans = (width: number) => ({
-    xs: { span: 24 }, sm: { span: 24 }, md: { span: Math.round(width / 100 * 24) }
-  });
+  const getColSpans = useCallback((width: number) => ({
+    xs: 24, 
+    sm: 24, 
+    md: Math.round(width / 100 * 24)
+  }), []);
 
-  const leftCol = getColSpans(leftPanelWidth);
-  const rightCol = getColSpans(rightPanelWidth);
+  const leftCol = useMemo(() => getColSpans(leftPanelWidth), [leftPanelWidth, getColSpans]);
+  const rightCol = useMemo(() => getColSpans(rightPanelWidth), [rightPanelWidth, getColSpans]);
   
-  const tabItems = [
+  const tabItems = useMemo(() => [
     {
       label: 'Tree Editor',
       key: 'tree',
       children: (
         <div style={{ padding: 16, ...styles.treeEditorContainer }}>
-          {selectedItem ? (
+          {selectedNode ? (
             <JSONPropertyRenderer
-              itemKey={selectedItem.key}
-              value={selectedItem.value}
-              path={selectedItem.fullPath}
+              itemKey={selectedNode.key}
+              data={data}
+              path={selectedNode.fullPath}
               onChange={handleChange}
-              onDelete={() => handleDeleteItem(selectedItem.fullPath)}
+              onDelete={() => handleDeleteItem(selectedNode.fullPath)}
               styles={styles}
             />
           ) : (
@@ -119,26 +120,26 @@ export const DynamicLayout: React.FC<DynamicLayoutProps> = ({
       key: 'json',
       children: <JSONEditor value={data} onChange={handleJsonChange} styles={styles} />,
     },
-  ];
+  ], [data, handleChange, handleDeleteItem, selectedNode, styles]);
 
   return (
     <Row gutter={[20, 20]} style={styles.root}>
-      <Col {...leftCol}>
+      <Col xs={leftCol.xs} sm={leftCol.sm} md={leftCol.md}>
         <div style={styles.stickyNav} ref={setRef('navContainer')}>
           <Card title="Object Navigator" style={{ ...styles.card, height: '100%' }}>
             <ObjectTreeView
               data={data}
-              onChange={setSelectedItem}
+              onChange={setSelectedNode}
               height={treeHeight}
               style={styles.tree}
             />
           </Card>
         </div>
       </Col>
-      <Col {...rightCol}>
+      <Col xs={rightCol.xs} sm={rightCol.sm} md={rightCol.md}>
         <Tabs
           activeKey={activeTab}
-          onChange={(key) => setActiveTab(key as 'tree' | 'json')}
+          onChange={(activeKey) => setActiveTab(activeKey as 'tree' | 'json')}
           centered
           items={tabItems}
           style={styles.tabs}

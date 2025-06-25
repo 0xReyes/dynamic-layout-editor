@@ -13,7 +13,7 @@ interface ObjectTreeViewProps {
 }
 
 export const ObjectTreeView: React.FC<ObjectTreeViewProps> = React.memo(({ data, onChange, height, style }) => {
-  const buildTreeData = useCallback((nodes: any, currentPath = '') => {
+  const buildTreeData = useCallback((nodes: any, currentPath = ''): any[] => {
     if (!nodes || typeof nodes !== 'object') return [];
     
     return Object.keys(nodes).map((key) => {

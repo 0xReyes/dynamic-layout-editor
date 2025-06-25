@@ -1,70 +1,81 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+// src/hooks/useMultiSize.js
+import { useRef, useState, useCallback, useEffect } from 'react';
 
-interface Size {
-  width: number;
-  height: number;
-}
-
-interface Sizes {
-  [key: string]: Size;
-}
-
-export const useMultiSize = () => {
-  const refs = useRef<{ [key: string]: HTMLElement }>({});
-  const [sizes, setSizes] = useState<Sizes>({});
+const useMultiSize = () => {
+  const elementsRef = useRef<Map<any, Element>>(new Map());
+  const [sizes, setSizes] = useState<Map<any, { width: number; height: number }>>(() => new Map());
   const observerRef = useRef<ResizeObserver | null>(null);
+  const elementToKeyMapRef = useRef<WeakMap<Element, any>>(new WeakMap());
 
-  const setRef = useCallback(
-    (key: string) => (el: HTMLElement | null) => {
-      if (el) {
-        el.dataset.key = key;
-        refs.current[key] = el;
-        if (observerRef.current) {
-          observerRef.current.observe(el);
-        }
-      } else {
-        const existingEl = refs.current[key];
-        if (existingEl && observerRef.current) {
-          observerRef.current.unobserve(existingEl);
-        }
-        delete refs.current[key];
+  const setRef = useCallback((key: string) => (element: any) => {
+    const currentMap = elementsRef.current;
+    const observer = observerRef.current;
+
+    // Clean up previous element if exists
+    if (currentMap.has(key)) {
+      const prevElement = currentMap.get(key);
+      if (prevElement) {
+        elementToKeyMapRef.current.delete(prevElement);
+        if (observer) observer.unobserve(prevElement);
       }
-    },
-    []
-  );
+      currentMap.delete(key);
+    }
+
+    // Register new element
+    if (element) {
+      currentMap.set(key, element);
+      elementToKeyMapRef.current.set(element, key);
+      if (observer) observer.observe(element);
+    }
+  }, []);
 
   useEffect(() => {
+    if (typeof ResizeObserver === 'undefined') return;
+
     const observer = new ResizeObserver((entries) => {
-      setSizes((prevSizes) => {
-        const newSizes = { ...prevSizes };
-        let hasChanged = false;
+      setSizes(prevSizes => {
+        let updated = false;
+        const nextSizes = new Map(prevSizes);
+
         for (const entry of entries) {
-          const key = (entry.target as HTMLElement).dataset.key;
+          const element = entry.target;
+          const key = elementToKeyMapRef.current.get(element);
+          
           if (!key) continue;
 
           const newWidth = Math.round(entry.contentRect.width);
           const newHeight = Math.round(entry.contentRect.height);
+          const currentSize = prevSizes.get(key);
 
-          if (
-            !prevSizes[key] ||
-            prevSizes[key].width !== newWidth ||
-            prevSizes[key].height !== newHeight
-          ) {
-            newSizes[key] = { width: newWidth, height: newHeight };
-            hasChanged = true;
+          if (!currentSize || 
+              currentSize.width !== newWidth || 
+              currentSize.height !== newHeight) {
+            nextSizes.set(key, { width: newWidth, height: newHeight });
+            updated = true;
           }
         }
-        return hasChanged ? newSizes : prevSizes;
+
+        return updated ? nextSizes : prevSizes;
       });
     });
 
     observerRef.current = observer;
-    Object.values(refs.current).forEach((el) => {
-      if (el) observer.observe(el);
+    
+    // Observe all current elements
+    elementsRef.current.forEach(element => {
+      observer.observe(element);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      observerRef.current = null;
+    };
   }, []);
 
-  return { setRef, sizes };
+  return { 
+    setRef, 
+    sizes: Object.fromEntries(sizes) // Converts to plain object
+  };
 };
+
+export default useMultiSize;
