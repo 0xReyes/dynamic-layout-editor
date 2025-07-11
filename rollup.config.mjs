@@ -1,67 +1,50 @@
-import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import babel from '@rollup/plugin-babel';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import { swc } from '@rollup/plugin-swc';
-import postcss from 'rollup-plugin-postcss';
 import terser from '@rollup/plugin-terser';
-import dts from 'rollup-plugin-dts';
-import { createRequire } from 'node:module';
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 
-const require = createRequire(import.meta.url);
-const packageJson = require('./package.json');
-
-export default [
-  // Main bundle for CJS and ESM
-  {
-    input: 'src/index.ts',
-    output: [
-      {
-        file: packageJson.main,
-        format: 'cjs',
-        sourcemap: true,
-      },
-      {
-        file: packageJson.module,
-        format: 'esm',
-        sourcemap: true,
-      },
-    ],
-    plugins: [
-      peerDepsExternal(),
-      resolve({
-        extensions: ['.js', '.jsx', '.ts', '.tsx']
-      }),
-      commonjs(),
-      swc({
-        swc: {
-          jsc: {
-            transform: {
-              react: {
-                runtime: 'automatic',
-              },
-            },
-            parser: {
-              syntax: 'typescript',
-              tsx: true,
-            },
-          },
-        },
-      }),
-      postcss({
-        extract: 'styles.css',
-        modules: true,
-        use: ['sass'],
-        minimize: true,
-      }),
-      terser(),
-    ],
-    external: ['react', 'react-dom', 'antd'],
-  },
-  // TypeScript declaration file bundle
-  {
-    input: 'src/index.ts',
-    output: [{ file: 'dist/types/index.d.ts', format: 'esm' }],
-    plugins: [dts()],
-    external: [/\.css$/u, 'react', 'react-dom', 'antd'],
-  },
-];
+export default {
+  input: 'src/index.js',
+  output: [
+    {
+      file: 'dist/index.js',
+      format: 'cjs',
+      exports: 'named',
+      sourcemap: true
+    },
+    {
+      file: 'dist/index.esm.js',
+      format: 'esm',
+      exports: 'named',
+      sourcemap: true
+    }
+  ],
+  plugins: [
+    peerDepsExternal(),
+    resolve({
+      browser: true,
+      dedupe: ['react', 'react-dom']
+    }),
+    babel({
+      babelHelpers: 'bundled',
+      presets: [
+        ['@babel/preset-env', {
+          targets: {
+            browsers: ["> 1%", "last 2 versions"]
+          }
+        }],
+        ['@babel/preset-react', {
+          runtime: 'automatic'
+        }]
+      ],
+      extensions: ['.js', '.jsx'],
+      exclude: 'node_modules/**'
+    }),
+    commonjs({
+      include: 'node_modules/**'
+    }),
+    terser()
+  ],
+  external: ['react', 'react-dom', 'antd', 'lodash']
+};
