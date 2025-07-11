@@ -1,4 +1,4 @@
-name: Build and Deploy Storybook
+name: Build and Deploy
 
 on:
   push:
@@ -19,9 +19,13 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+        registry-url: 'https://registry.npmjs.org'
         
     - name: Install dependencies
       run: npm ci
+      
+    - name: Build package
+      run: npm run build
       
     - name: Build Storybook
       run: npm run build-storybook
