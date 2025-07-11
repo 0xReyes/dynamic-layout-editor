@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Input, InputNumber, Checkbox, Button, Space, Typography, Layout, Tree, ConfigProvider, theme, Modal, notification, Radio } from 'antd';
 import { PlusOutlined, DeleteOutlined, SnippetsOutlined } from '@ant-design/icons';
 import _ from 'lodash';
-const { Text } = Typography;
+const { Text, Title } = Typography;
 
 // Utility functions
 const getValueType = (value) => {
@@ -326,7 +326,7 @@ const DynamicLayoutEditor = ({
             padding: '16px', 
             borderBottom: `1px solid ${token.colorBorder}`, 
           }}>
-            <Typography.Title level={5}>{navigatorTitle}</Typography.Title>
+            <Title level={5}>{navigatorTitle}</Title>
           </Layout>
           <ObjectTreeView data={data} onNodeSelect={handleNodeSelect} />
         </Layout.Sider>
@@ -341,9 +341,9 @@ const DynamicLayoutEditor = ({
               justifyContent: 'space-between' 
             }}
           >
-            <Typography.Title level={4} style={{ margin: 0 }}>
+            <Title level={4} style={{ margin: 0 }}>
               {editorTitle}
-            </Typography.Title>
+            </Title>
             <Button icon={<SnippetsOutlined />} onClick={showSourceModal}>
               View Source
             </Button>
