@@ -1,4 +1,4 @@
-import DynamicLayoutEditor from '../src/index.js';
+import DynamicLayoutEditor from '../src/index.jsx';
 
 export default {
   title: 'Demo/DynamicLayoutEditor',
