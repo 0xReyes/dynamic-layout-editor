@@ -1,1 +1,1 @@
-{"v":4,"entries":{"components-dynamiclayout--default":{"type":"story","id":"components-dynamiclayout--default","name":"Default","title":"Components/DynamicLayout","importPath":"./src/components/DynamicLayout/DynamicLayout.stories.tsx","tags":["story"]}}}
+{"v":4,"entries":{"demo-dynamiclayouteditor--default":{"type":"story","id":"demo-dynamiclayouteditor--default","name":"Default","title":"Demo/DynamicLayoutEditor","importPath":"./stories/Demo.stories.js","tags":["story"]}}}
