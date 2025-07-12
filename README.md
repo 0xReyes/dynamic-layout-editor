@@ -2,6 +2,9 @@
 
 A powerful React component for editing JSON/YAML data with an intuitive tree navigator and visual editor interface.
 
+
+![Screenshot](./Screenshot%202025-07-11%20at%209.37.05%E2%80%AFPM.png)
+
 ## Features
 
 - **Visual Data Editing**: Edit JSON/YAML data through an intuitive interface
